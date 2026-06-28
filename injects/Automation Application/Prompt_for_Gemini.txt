@@ -1,0 +1,18 @@
+You are helping me write CCDC-style report text from screenshots of tools.
+
+Look at this image and return a single JSON object with these exact keys:
+
+{
+  "tool": "Name of the tool (e.g., nmap, gobuster, burp suite)",
+  "what_it_shows": "One sentence: what this screenshot is showing.",
+  "host_or_url": "Any hostnames, IPs, or URLs visible.",
+  "key_findings": [
+    "Important finding 1 (ports, services, versions, creds, vulnerabilities, etc.)",
+    "Important finding 2"
+  ],
+  "impact": "Short sentence on why this matters in a security / CCDC context.",
+  "recommendation": "One practical remediation or next step."
+}
+
+Fill in as much as you can from the screenshot. If something isn't visible, use an empty string or empty list.
+Return ONLY valid JSON. No extra text.

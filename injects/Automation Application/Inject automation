@@ -1,0 +1,232 @@
+// Grab the first input item (Gemini output + webhook metadata)
+const item  = $input.first();
+const json  = item.json || {};
+const query = json.query || {};
+
+// 1) Get the Gemini text we previously saw
+const raw =
+  json?.content?.parts?.[0]?.text ??
+  json?.content?.parts?.[0]?.content ??
+  '';
+
+// 2) Clean possible ```json fences
+const cleaned = String(raw).replace(/```json|```/g, '').trim();
+
+// 3) Parse Gemini's JSON
+let data;
+try {
+  data = JSON.parse(cleaned);
+} catch (error) {
+  throw new Error('Failed to parse JSON: ' + error.message + '\nRaw:\n' + cleaned);
+}
+
+// 4) Pull fields (with safe defaults)
+const tool           = data.tool || 'Unknown tool';
+const host_or_url    = data.host_or_url || 'Unknown target';
+const what           = data.what_it_shows || '';
+const key_findings   = Array.isArray(data.key_findings) ? data.key_findings : [];
+const impact         = data.impact || '';
+const recommendation = data.recommendation || '';
+
+// Metadata from query parameters (or placeholders if missing)
+const team        = query.team        || '<Team>';
+const injectName  = query.inject_name || '<Inject Name>';
+const injectId    = query.inject_id   || '<Inject ID>';
+
+// 5) Derive a couple of extra strings for the template
+const heading1Title = 'Technical Analysis';
+const heading2Title = 'Impact and Recommendations';
+
+// Device & service: simple guess based on host & first finding
+const device  = host_or_url;
+const service = key_findings[0] || 'Primary service identified in the screenshot';
+
+// Build Analysis of Vulnerabilities section as bullets
+let analysisText = '';
+if (key_findings.length) {
+  for (const k of key_findings) {
+    analysisText += `- ${k}\n`;
+  }
+} else {
+  analysisText = '- [No explicit vulnerabilities identified from this screenshot]\n';
+}
+
+// Picture caption
+const figureCaption = `Screenshot of ${tool} output against ${host_or_url} showing key evidence referenced above.`;
+
+// 6) Build the full inject memo in your template shape
+
+let inject = '';
+
+inject += `Team: ${team}\n\n`;
+inject += `Inject Name: ${injectName}\n\n`;
+inject += `Inject ID: ${injectId}\n\n`;
+
+// short blurb / purpose of memo
+if (what) {
+  inject += `${what}\n\n`;
+} else {
+  inject += `This memo documents findings from ${tool} output against ${host_or_url}.\n\n`;
+}
+
+// Heading 1
+inject += `${heading1Title}\n\n`;
+
+if (key_findings.length) {
+  inject += `The ${tool} output for ${host_or_url} revealed the following key observations:\n\n`;
+  for (const k of key_findings) {
+    inject += `- ${k}\n`;
+  }
+  inject += `\n`;
+} else {
+  inject += `No specific findings were extracted from the screenshot.\n\n`;
+}
+
+// Heading 2
+inject += `${heading2Title}\n\n`;
+if (impact) {
+  inject += `**Impact:** ${impact}\n\n`;
+}
+if (recommendation) {
+  inject += `**Recommendation:** ${recommendation}\n\n`;
+}
+
+// Device / Service
+inject += `Device\n\n`;
+inject += `${device}\n\n`;
+inject += `Service\n\n`;
+inject += `${service}\n\n`;
+
+// Analysis of Vulnerabilities
+inject += `Analysis of Vulnerabilities\n\n`;
+inject += `${analysisText}\n`;
+
+// Picture + Figure caption
+inject += `<picture>\n\n`;
+inject += `Figure #: ${figureCaption}\n`;
+
+// 7) Also keep the raw parsed JSON if you ever want it
+return [
+  {
+    json: {
+      parsed: data,
+      inject_text: inject,
+    },
+  },
+];
+// Grab the first input item (Gemini output + webhook metadata)
+const item  = $input.first();
+const json  = item.json || {};
+const query = json.query || {};
+
+// 1) Get the Gemini text we previously saw
+const raw =
+  json?.content?.parts?.[0]?.text ??
+  json?.content?.parts?.[0]?.content ??
+  '';
+
+// 2) Clean possible ```json fences
+const cleaned = String(raw).replace(/```json|```/g, '').trim();
+
+// 3) Parse Gemini's JSON
+let data;
+try {
+  data = JSON.parse(cleaned);
+} catch (error) {
+  throw new Error('Failed to parse JSON: ' + error.message + '\nRaw:\n' + cleaned);
+}
+
+// 4) Pull fields (with safe defaults)
+const tool           = data.tool || 'Unknown tool';
+const host_or_url    = data.host_or_url || 'Unknown target';
+const what           = data.what_it_shows || '';
+const key_findings   = Array.isArray(data.key_findings) ? data.key_findings : [];
+const impact         = data.impact || '';
+const recommendation = data.recommendation || '';
+
+// Metadata from query parameters (or placeholders if missing)
+const team        = query.team        || '<Team>';
+const injectName  = query.inject_name || '<Inject Name>';
+const injectId    = query.inject_id   || '<Inject ID>';
+
+// 5) Derive a couple of extra strings for the template
+const heading1Title = 'Technical Analysis';
+const heading2Title = 'Impact and Recommendations';
+
+// Device & service: simple guess based on host & first finding
+const device  = host_or_url;
+const service = key_findings[0] || 'Primary service identified in the screenshot';
+
+// Build Analysis of Vulnerabilities section as bullets
+let analysisText = '';
+if (key_findings.length) {
+  for (const k of key_findings) {
+    analysisText += `- ${k}\n`;
+  }
+} else {
+  analysisText = '- [No explicit vulnerabilities identified from this screenshot]\n';
+}
+
+// Picture caption
+const figureCaption = `Screenshot of ${tool} output against ${host_or_url} showing key evidence referenced above.`;
+
+// 6) Build the full inject memo in your template shape
+
+let inject = '';
+
+inject += `Team: ${team}\n\n`;
+inject += `Inject Name: ${injectName}\n\n`;
+inject += `Inject ID: ${injectId}\n\n`;
+
+// short blurb / purpose of memo
+if (what) {
+  inject += `${what}\n\n`;
+} else {
+  inject += `This memo documents findings from ${tool} output against ${host_or_url}.\n\n`;
+}
+
+// Heading 1
+inject += `${heading1Title}\n\n`;
+
+if (key_findings.length) {
+  inject += `The ${tool} output for ${host_or_url} revealed the following key observations:\n\n`;
+  for (const k of key_findings) {
+    inject += `- ${k}\n`;
+  }
+  inject += `\n`;
+} else {
+  inject += `No specific findings were extracted from the screenshot.\n\n`;
+}
+
+// Heading 2
+inject += `${heading2Title}\n\n`;
+if (impact) {
+  inject += `**Impact:** ${impact}\n\n`;
+}
+if (recommendation) {
+  inject += `**Recommendation:** ${recommendation}\n\n`;
+}
+
+// Device / Service
+inject += `Device\n\n`;
+inject += `${device}\n\n`;
+inject += `Service\n\n`;
+inject += `${service}\n\n`;
+
+// Analysis of Vulnerabilities
+inject += `Analysis of Vulnerabilities\n\n`;
+inject += `${analysisText}\n`;
+
+// Picture + Figure caption
+inject += `<picture>\n\n`;
+inject += `Figure #: ${figureCaption}\n`;
+
+// 7) Also keep the raw parsed JSON if you ever want it
+return [
+  {
+    json: {
+      parsed: data,
+      inject_text: inject,
+    },
+  },
+];

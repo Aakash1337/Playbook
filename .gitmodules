@@ -1,0 +1,6 @@
+[submodule "wildcard/windows/HardeningKitty"]
+	path = wildcard/windows/HardeningKitty
+	url = https://github.com/scipag/HardeningKitty.git
+[submodule "wildcard/windows/sawh"]
+	path = wildcard/windows/sawh
+	url = https://github.com/cutaway-security/sawh

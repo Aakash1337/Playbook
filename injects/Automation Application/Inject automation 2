@@ -1,0 +1,56 @@
+// Take the first input item (the Gemini result)
+const item = $input.first();
+
+// 1. Get the text that Gemini returned
+const raw = item?.json?.content?.parts?.[0]?.text ?? '';
+
+// 2. Clean any accidental ```json ``` wrappers
+const cleaned = String(raw).replace(/```json|```/g, '').trim();
+
+// 3. Parse JSON
+let data;
+try {
+  data = JSON.parse(cleaned);
+} catch (error) {
+  throw new Error('Failed to parse JSON: ' + error.message + '\nRaw:\n' + cleaned);
+}
+
+// 4. Build a Markdown snippet for your report
+const tool           = data.tool || 'Unknown tool';
+const host_or_url    = data.host_or_url || 'Unknown target';
+const what           = data.what_it_shows || '';
+const key_findings   = Array.isArray(data.key_findings) ? data.key_findings : [];
+const impact         = data.impact || '';
+const recommendation = data.recommendation || '';
+
+let md = `### ${tool.toUpperCase()} – ${host_or_url}\n\n`;
+
+if (what) {
+  md += `${what}\n\n`;
+}
+
+if (key_findings.length) {
+  md += `**Key findings:**\n`;
+  for (const k of key_findings) {
+    md += `- ${k}\n`;
+  }
+  md += `\n`;
+}
+
+if (impact) {
+  md += `**Impact:** ${impact}\n\n`;
+}
+
+if (recommendation) {
+  md += `**Recommendation:** ${recommendation}\n\n`;
+}
+
+// 5. Return parsed JSON + markdown as this node's output
+return [
+  {
+    json: {
+      parsed: data,
+      markdown: md,
+    },
+  },
+];

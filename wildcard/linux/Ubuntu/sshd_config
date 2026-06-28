@@ -1,0 +1,57 @@
+Port 22  # You may change this to a non-standard port (e.g., 2222) to reduce automated scanning
+ListenAddress 0.0.0.0
+#ListenAddress ::  # Enable only if you need IPv6 access
+
+# HostKeys are typically handled by default unless custom keys are used
+#HostKey /etc/ssh/ssh_host_rsa_key
+#HostKey /etc/ssh/ssh_host_ecdsa_key
+#HostKey /etc/ssh/ssh_host_ed25519_key
+
+# Logging
+SyslogFacility AUTH
+LogLevel VERBOSE  # Enables detailed logging for auditing
+
+# Authentication
+LoginGraceTime 30  # Short window to prevent long brute-force sessions
+PermitRootLogin no  # Never allow root login
+StrictModes yes
+MaxAuthTries 3
+MaxSessions 2
+
+PubkeyAuthentication yes
+AuthorizedKeysFile .ssh/authorized_keys
+
+PasswordAuthentication no  # Enforce key-based auth only
+PermitEmptyPasswords no
+KbdInteractiveAuthentication no
+
+# UsePAM is typically unnecessary if not using PAM-based auth or sessions
+UsePAM no
+
+# Disable agent and TCP forwarding unless needed
+AllowAgentForwarding no
+AllowTcpForwarding no
+X11Forwarding no  # Disable X11 unless needed
+
+PrintMotd no
+PrintLastLog yes
+TCPKeepAlive no
+ClientAliveInterval 300
+ClientAliveCountMax 2
+
+UseDNS no  # Speeds up login and prevents DNS leaks
+
+# Optional hardening
+Compression no
+PermitTunnel no
+ChrootDirectory none
+Banner /etc/issue.net  # Create this file if you want a legal warning banner
+
+# Subsystem (default)
+Subsystem sftp /usr/libexec/sftp-server
+
+# Match block for specific users/groups (optional hardening)
+#Match User youruser
+#    AllowTcpForwarding yes
+#    X11Forwarding no
+#    ForceCommand internal-sftp

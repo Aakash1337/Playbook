@@ -1,0 +1,109 @@
+// --------- 1. Get Gemini result (current item) ---------
+const gemItem = $input.first();
+const gemJson = gemItem.json || {};
+
+// --------- 2. Get query params from the Webhook node ---------
+// IMPORTANT: the node on the canvas must be named exactly "Webhook".
+// If it's named differently (e.g. "CCDC Webhook"), change the string below.
+const webhookJson = $node["Webhook"]?.json || {};
+const query       = webhookJson.query || {};
+
+// --------- 3. Parse Gemini's JSON text ---------
+const raw =
+  gemJson?.content?.parts?.[0]?.text ??
+  '';
+
+const cleaned = String(raw).replace(/```json|```/g, '').trim();
+
+let data;
+try {
+  data = JSON.parse(cleaned);
+} catch (error) {
+  throw new Error('Failed to parse JSON: ' + error.message + '\nRaw:\n' + cleaned);
+}
+
+// --------- 4. Pull fields with safe defaults ---------
+const tool           = data.tool || 'Unknown tool';
+const host_or_url    = data.host_or_url || 'Unknown target';
+const what           = data.what_it_shows || '';
+const key_findings   = Array.isArray(data.key_findings) ? data.key_findings : [];
+const impact         = data.impact || '';
+const recommendation = data.recommendation || '';
+
+// Metadata from query params (or fallback placeholders)
+const team       = query.team        || '<Team>';
+const injectName = query.inject_name || '<Inject Name>';
+const injectId   = query.inject_id   || '<Inject ID>';
+
+// Extra strings for template
+const heading1Title = 'Technical Analysis';
+const heading2Title = 'Impact and Recommendations';
+
+const device  = host_or_url;
+const service = key_findings[0] || 'Primary service identified in the screenshot';
+
+let analysisText = '';
+if (key_findings.length) {
+  for (const k of key_findings) {
+    analysisText += `- ${k}\n`;
+  }
+} else {
+  analysisText = '- [No explicit vulnerabilities identified from this screenshot]\n';
+}
+
+const figureCaption =
+  `Screenshot of ${tool} output against ${host_or_url} showing key evidence referenced above.`;
+
+// --------- 5. Build full inject text ---------
+let inject = '';
+
+inject += `Team: ${team}\n\n`;
+inject += `Inject Name: ${injectName}\n\n`;
+inject += `Inject ID: ${injectId}\n\n`;
+
+if (what) {
+  inject += `${what}\n\n`;
+} else {
+  inject += `This memo documents findings from ${tool} output against ${host_or_url}.\n\n`;
+}
+
+inject += `${heading1Title}\n\n`;
+
+if (key_findings.length) {
+  inject += `The ${tool} output for ${host_or_url} revealed the following key observations:\n\n`;
+  for (const k of key_findings) {
+    inject += `- ${k}\n`;
+  }
+  inject += `\n`;
+} else {
+  inject += `No specific findings were extracted from the screenshot.\n\n`;
+}
+
+inject += `${heading2Title}\n\n`;
+if (impact) {
+  inject += `**Impact:** ${impact}\n\n`;
+}
+if (recommendation) {
+  inject += `**Recommendation:** ${recommendation}\n\n`;
+}
+
+inject += `Device\n\n`;
+inject += `${device}\n\n`;
+inject += `Service\n\n`;
+inject += `${service}\n\n`;
+
+inject += `Analysis of Vulnerabilities\n\n`;
+inject += `${analysisText}\n`;
+
+inject += `<picture>\n\n`;
+inject += `Figure #: ${figureCaption}\n`;
+
+// --------- 6. Return result ---------
+return [
+  {
+    json: {
+      parsed: data,
+      inject_text: inject,
+    },
+  },
+];
