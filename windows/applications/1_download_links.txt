@@ -1,0 +1,11 @@
+Sysinternals:
+https://download.sysinternals.com/files/SysinternalsSuite.zip
+
+Nmap:
+https://nmap.org/dist/nmap-7.98-setup.exe
+
+PingCastle:
+https://github.com/netwrix/pingcastle/releases
+
+Malwarebytes (manual alternative, use Ninite exe first):
+https://www.malwarebytes.com/mwb-download/thankyou

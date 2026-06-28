@@ -1,0 +1,16 @@
+[
+  { "Port": 80, "Protocol": "TCP", "Name": "HTTP" },
+  { "Port": 443, "Protocol": "TCP", "Name": "HTTPS" },
+  { "Port": 53, "Protocol": "TCP", "Name": "DNS-TCP" },
+  { "Port": 53, "Protocol": "UDP", "Name": "DNS-UDP" },
+  { "Port": 123, "Protocol": "UDP", "Name": "NTP" },
+  { "Port": 25, "Protocol": "TCP", "Name": "SMTP" },
+  { "Port": 110, "Protocol": "TCP", "Name": "POP3" },
+  { "Port": 389, "Protocol": "TCP", "Name": "LDAP" },
+  { "Port": 389, "Protocol": "UDP", "Name": "LDAP-UDP" },
+  { "Port": 636, "Protocol": "TCP", "Name": "LDAPS" },
+  { "Port": 445, "Protocol": "TCP", "Name": "SMB" },
+  { "Port": 3389, "Protocol": "TCP", "Name": "RDP" },
+  { "Port": 8000, "Protocol": "TCP", "Name": "Splunk-Web" },
+  { "Port": 9997, "Protocol": "TCP", "Name": "Splunk-Logs" }
+]
